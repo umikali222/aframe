@@ -1,0 +1,17 @@
+section .bss
+    text dword
+    y qword
+    z qword
+    i byte
+    x word
+
+_start:
+    mov y, 9
+    mov z, 10
+    mov x, 21
+
+    add y, x
+
+    mov rax, 60
+    mov rdi, 0
+    syscall
