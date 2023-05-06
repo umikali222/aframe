@@ -6,7 +6,7 @@ Yes, I know this code is probably the worst code that you've seen in your entire
 from sys import argv
 from os import _exit, system
 
-instructions = ('mov', 'add', 'syscall')
+instructions = ('mov', 'add', 'sub', 'syscall')
 registers = ['rax', 'rbx', 'rcx', 'rdx', 'cs', 'ds', 'ss', 'es', 'fs', 'gs', 'rbp', 'rsp', 'rsi', 'rdi', 'rip', 'rflags']
 
 try:
@@ -62,6 +62,14 @@ def instructionConvert(instruction:str):
         out = '''mov rax, [xddddddddddd]
     mov rbx, [lolthisisnumber1]
     add rax, rbx
+    mov [xddddddddddd], rax'''
+        out = out.replace('xddddddddddd', split[1])
+        out = out.replace('lolthisisnumber1', split[2])
+        return out
+    elif split[0] == 'sub':
+        out = '''mov rax, [xddddddddddd]
+    mov rbx, [lolthisisnumber1]
+    sub rax, rbx
     mov [xddddddddddd], rax'''
         out = out.replace('xddddddddddd', split[1])
         out = out.replace('lolthisisnumber1', split[2])
