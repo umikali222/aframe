@@ -1,29 +1,32 @@
 section .data
     text db 72,101,108,108,111,44,32,87,111,114,108,100,33,10
+    newline db 10
 
 section .bss
-    x qword
-    y qword
-    z qword
-    i byte
+    x word
 
 _start:
     call _hello
-    mov x, 0
-    mov y, 1
-    mov z, 0
+    mov x, 65
 
 _loop:
-    add x, y
-    mov z, x
-    mov x, y
-    mov y, z
-    add i, 1
-    cmp i, 5
+    cmp x, 91
     je _exit
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, x;
+    mov rdx, 1
+    syscall
+    inc x
     jmp _loop
 
 _exit:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, newline
+    mov rdx, 1
+
     mov rax, 60
     mov rdi, 0
     syscall

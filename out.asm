@@ -3,42 +3,36 @@
 BITS 64
 section .data
     text db 72,101,108,108,111,44,32,87,111,114,108,100,33,10
+    newline db 10
 
 section .bss
-    x resb 8
-    y resb 8
-    z resb 8
-    i resb 1
+    x resb 2
 
 section .text
     global _start
     
 _start:
     call _hello
-    mov qword [x], 0
-    mov qword [y], 1
-    mov qword [z], 0
+    mov word [x], 65
 
 _loop:
-    mov rax, [x]
-    mov rbx, [y]
-    add rax, rbx
-    mov [x], rax
-    mov qword rax, [x]
-    mov qword [z], rax
-    mov qword rax, [y]
-    mov qword [x], rax
-    mov qword rax, [z]
-    mov qword [y], rax
-    mov rax, [i]
-    mov rbx, 1
-    add rax, rbx
-    mov [i], rax
-    cmp byte [i], 5
+    cmp word [x], 91
     je _exit
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, x;
+    mov rdx, 1
+    syscall
+    inc word[x]
     jmp _loop
 
 _exit:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, newline
+    mov rdx, 1
+
     mov rax, 60
     mov rdi, 0
     syscall

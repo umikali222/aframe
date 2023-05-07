@@ -8,7 +8,7 @@ from sys import argv
 from subprocess import run
 import os
 
-instructions = ('mov', 'add', 'sub', 'cmp', 'push', 'pop')
+instructions = ('mov', 'add', 'sub', 'cmp', 'push', 'pop', 'inc')
 registers = ['rax', 'rbx', 'rcx', 'rdx', 'cs', 'ds', 'ss', 'es', 'fs', 'gs', 'rbp', 'rsp', 'rsi', 'rdi', 'rip', 'rflags']
 
 try:
@@ -123,6 +123,13 @@ def instructionConvert(instruction:str):
         out = 'pop '
         if split[1] in variables:
             out += variableSize[split[1]] + ' [' + split[1] + ']'
+        else:
+            out += split[1]
+        return out
+    elif split[0] == 'inc':
+        out = 'inc '
+        if split[1] in variables:
+            out += variableSize[split[1]] + '[' + split[1] + ']'
         else:
             out += split[1]
         return out
