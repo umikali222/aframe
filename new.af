@@ -1,17 +1,28 @@
 section .bss
-    text dword
     y qword
     z qword
     i byte
     x word
 
+section .data
+    text db "Hello, World!",10
+
 _start:
-    mov y, 9
-    mov z, 10
-    mov x, 21
+    add y, 1
+    cmp y, 10
+    je _exit
 
-    add y, x
+    jmp _hello
 
+_exit:
     mov rax, 60
     mov rdi, 0
     syscall
+
+_hello:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, text
+    mov rdx, 14
+    syscall
+    jmp _start

@@ -3,8 +3,10 @@
 Yes, I know this code is probably the worst code that you've seen in your entire life.
 '''
 
+from time import sleep
 from sys import argv
-from os import _exit, system
+from subprocess import run
+import os
 
 instructions = ('mov', 'add', 'sub', 'cmp', 'syscall')
 registers = ['rax', 'rbx', 'rcx', 'rdx', 'cs', 'ds', 'ss', 'es', 'fs', 'gs', 'rbp', 'rsp', 'rsi', 'rdi', 'rip', 'rflags']
@@ -13,10 +15,10 @@ try:
     f = open(argv[1], 'r')
 except FileNotFoundError:
     print('ERROR!\nFile not found')
-    _exit()
+    exit()
 except IndexError:
     print('ERROR!\nFile not specified')
-    _exit()
+    exit()
 
 def getSectionBss(asm: str):
     sections = asm.split('section ')
@@ -56,7 +58,7 @@ def instructionConvert(instruction:str):
                 out += ', ' + split[2]
             else:
                 print('ERROR!\nVariable sizes do not match in', instruction)
-                _exit()
+                exit()
         else:
             out += variableSize[split[1]] + ' [' 
             out += split[1] + ']' + ', ' + split[2]
@@ -66,8 +68,14 @@ def instructionConvert(instruction:str):
     mov rbx, [lolthisisnumber1]
     add rax, rbx
     mov [xddddddddddd], rax'''
-        out = out.replace('xddddddddddd', split[1])
-        out = out.replace('lolthisisnumber1', split[2])
+        if split[1] in variables:
+            out = out.replace('xddddddddddd', split[1])
+        else:
+            out = out.replace('[xddddddddddd]', split[1])
+        if split[2] in variables:
+            out = out.replace('lolthisisnumber1', split[2])
+        else:
+            out = out.replace('[lolthisisnumber1]', split[2])
         return out
     elif split[0] == 'sub':
         out = '''mov rax, [xddddddddddd]
@@ -85,7 +93,7 @@ def instructionConvert(instruction:str):
                 out += split[1] + '], [' + split[2] + ']'
             else:
                 print('ERROR!\nVariable sizes do not match in', instruction)
-                _exit()
+                exit()
         elif split[1] in registers or split[2] in registers:
             if split[1] in variables:
                 out += '[' + split[1] + '], '
@@ -147,6 +155,14 @@ code = code.replace('byte', 'resb 1')
              
 code = updateAllInstructions(code)
 
-system('rm -f out.asm; touch out.asm')
-f = open('out.asm', 'w')
-f.write(code)
+if os.path.exists('out.asm'):
+    os.remove('out.asm')
+
+with open('out.asm', 'w') as f:
+    f.write(code)
+
+run(['nasm', '-f', 'elf64', '-o', 'a.o', 'out.asm'], check=True)
+run(['ld', 'a.o'], check=True)
+os.remove('a.o')
+os.rename('a.out', 'output')
+run(['./output'], check=True)
