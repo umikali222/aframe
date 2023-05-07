@@ -1,18 +1,27 @@
+section .data
+    text db 72,101,108,108,111,44,32,87,111,114,108,100,33,10
+
 section .bss
+    x qword
     y qword
     z qword
     i byte
-    x word
-
-section .data
-    text db "Hello, World!",10
 
 _start:
-    add y, 1
-    cmp y, 10
-    je _exit
+    call _hello
+    mov x, 0
+    mov y, 1
+    mov z, 0
 
-    jmp _hello
+_loop:
+    add x, y
+    mov z, x
+    mov x, y
+    mov y, z
+    add i, 1
+    cmp i, 5
+    je _exit
+    jmp _loop
 
 _exit:
     mov rax, 60
@@ -25,4 +34,4 @@ _hello:
     mov rsi, text
     mov rdx, 14
     syscall
-    jmp _start
+    ret

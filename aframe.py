@@ -8,7 +8,7 @@ from sys import argv
 from subprocess import run
 import os
 
-instructions = ('mov', 'add', 'sub', 'cmp', 'syscall')
+instructions = ('mov', 'add', 'sub', 'cmp', 'push', 'pop')
 registers = ['rax', 'rbx', 'rcx', 'rdx', 'cs', 'ds', 'ss', 'es', 'fs', 'gs', 'rbp', 'rsp', 'rsi', 'rdi', 'rip', 'rflags']
 
 try:
@@ -38,9 +38,7 @@ def getSectionBss(asm: str):
 def instructionConvert(instruction:str):
     instructionc = instruction.replace(',', '')
     split = instructionc.split(' ')
-    if split[0] == 'syscall':
-        return 'syscall'
-    elif split[0] == 'mov':
+    if split[0] == 'mov':
         out = 'mov '
         if split[1] in registers or split[2] in registers:
             if split[1] in variables:
@@ -54,8 +52,14 @@ def instructionConvert(instruction:str):
                 out += split[2]
         elif split[1] in variables and split[2] in variables:
             if variableSize[split[1]] == variableSize[split[2]]:
-                out += variableSize[split[1]] + ' ' + split[1]
-                out += ', ' + split[2]
+                out = '''mov vsize rax, [number2]
+    mov vsize [number1], rax'''
+                out = out.replace('vsize', variableSize[split[1]])
+                out = out.replace('number1', split[1])
+                out = out.replace('number2', split[2])
+                
+                #out += variableSize[split[1]] + ' [' + split[1]
+                #out += '], [' + split[2] + ']'
             else:
                 print('ERROR!\nVariable sizes do not match in', instruction)
                 exit()
@@ -107,6 +111,20 @@ def instructionConvert(instruction:str):
             out += variableSize[split[1]] + ' [' + split[1] + '], ' + split[2]
         elif split[2] in variables:
             out += variableSize[split[2]] + ' ' + split[1] + ', [' + split[2] + ']'
+        return out
+    elif split[0] == 'push':
+        out = 'push '
+        if split[1] in variables:
+            out += variableSize[split[1]] + ' [' + split[1] + ']'
+        else:
+            out += split[1]
+        return out
+    elif split[0] == 'pop':
+        out = 'pop '
+        if split[1] in variables:
+            out += variableSize[split[1]] + ' [' + split[1] + ']'
+        else:
+            out += split[1]
         return out
 
 def updateAllInstructions(asm: str):
