@@ -1,12 +1,12 @@
+#!/bin/python3
 '''
 Yes, I know this code is probably the worst code that you've seen in your entire life.
-
 '''
 
 from sys import argv
 from os import _exit, system
 
-instructions = ('mov', 'add', 'sub', 'syscall')
+instructions = ('mov', 'add', 'sub', 'cmp', 'syscall')
 registers = ['rax', 'rbx', 'rcx', 'rdx', 'cs', 'ds', 'ss', 'es', 'fs', 'gs', 'rbp', 'rsp', 'rsi', 'rdi', 'rip', 'rflags']
 
 try:
@@ -34,8 +34,8 @@ def getSectionBss(asm: str):
     return bss
 
 def instructionConvert(instruction:str):
-    instruction = instruction.replace(',', '')
-    split = instruction.split(' ')
+    instructionc = instruction.replace(',', '')
+    split = instructionc.split(' ')
     if split[0] == 'syscall':
         return 'syscall'
     elif split[0] == 'mov':
@@ -54,6 +54,9 @@ def instructionConvert(instruction:str):
             if variableSize[split[1]] == variableSize[split[2]]:
                 out += variableSize[split[1]] + ' ' + split[1]
                 out += ', ' + split[2]
+            else:
+                print('ERROR!\nVariable sizes do not match in', instruction)
+                _exit()
         else:
             out += variableSize[split[1]] + ' [' 
             out += split[1] + ']' + ', ' + split[2]
@@ -74,8 +77,31 @@ def instructionConvert(instruction:str):
         out = out.replace('xddddddddddd', split[1])
         out = out.replace('lolthisisnumber1', split[2])
         return out
+    elif split[0] == 'cmp':
+        out = 'cmp '
+        if split[1] in variables and split[2] in variables:
+            if variableSize[split[1]] == variableSize[split[2]]:
+                out += variableSize[split[1]] + ' ['
+                out += split[1] + '], [' + split[2] + ']'
+            else:
+                print('ERROR!\nVariable sizes do not match in', instruction)
+                _exit()
+        elif split[1] in registers or split[2] in registers:
+            if split[1] in variables:
+                out += '[' + split[1] + '], '
+            else:
+                out += split[1]
+            if split[2] in variables:
+                out += '[' + split[2] + ']'
+            else:
+                out += split[2]
+        elif split[1] in variables:
+            out += variableSize[split[1]] + ' [' + split[1] + '], ' + split[2]
+        elif split[2] in variables:
+            out += variableSize[split[2]] + ' ' + split[1] + ', [' + split[2] + ']'
+        return out
 
-def getAllInstructions(asm: str):
+def updateAllInstructions(asm: str):
     asmc = asm.replace('    ', '')
     asmc = asmc.replace('\t', '')
     lines = asmc.split('\n')
@@ -119,7 +145,7 @@ code = code.replace('dword', 'resb 4')
 code = code.replace('word', 'resb 2')
 code = code.replace('byte', 'resb 1')
              
-code = getAllInstructions(code)
+code = updateAllInstructions(code)
 
 system('rm -f out.asm; touch out.asm')
 f = open('out.asm', 'w')
